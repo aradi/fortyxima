@@ -106,6 +106,12 @@ Forking the project
 Developing your feature
 -----------------------
 
+If you have already forked the project for an other feature branch before,
+execute Step 1 in section `Staying up to date with the official develop branch`_
+before carrying out the following steps.  This way you make sure that your
+`develop` branch is synchronized with the official one. Otherwise, you can start
+directly with the steps below:
+
 #. Create you own feature branch::
 
        git checkout -b some-new-feature
@@ -209,8 +215,28 @@ get it merged into the official `develop` branch, issue a pull request.
 
 #. Once the discussion on your pull request is done, one of the developers with
    write permission to the official repository will merge your branch into the
-   official `develop`-branch. If you get the notification about the successful
-   merge (you should also see your changes in the official `develop` branch) you
-   can delete your local feature branch and open a new one for the next feature,
-   you would like to implement.
+   official `develop`-branch. Once this has happened, you should see your
+   changes showing up there.
 
+
+Deleting your feature branch
+----------------------------
+
+If your feature had been merged into the official code, you can delete your
+feature branch locally and on Bitbucket as well:
+
+#. In order to delete the feature branch locally, change to the develop branch
+   (or any branch other than your feature branch) and delete your feature
+   branch::
+
+       git checkout develop
+       git branch -d some-new-feature
+
+#. In order to delete the feature branch on Bitbucket as well, use the command::
+
+       git push origin --delete some-new-feature
+
+This closes the development cycle of your old feature and opens a new one for
+the next feature you are going to develop. You can then again create a new
+branch for the new feature and develop your next extension starting with the
+steps described in section `Developing your feature`_.
