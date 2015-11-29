@@ -1,0 +1,18 @@
+def options(opt):
+    opt.load('compiler_fc')
+    opt.load('compiler_c')
+
+
+def configure(conf):
+    conf.load('compiler_fc')
+    conf.load('compiler_c')
+
+
+def build(bld):
+    libsources = bld.path.ant_glob('fortyxima.F90')
+    libsources += bld.path.ant_glob(['filesys/*.F90', 'filesys/*.c'])
+    bld(
+        features="c fc fcstlib",
+        source=libsources,
+        target="fortyxima"
+    )

@@ -2,3 +2,5 @@
 *.o
 *.mod
 \#*
+_build
+.lock-waf_*
