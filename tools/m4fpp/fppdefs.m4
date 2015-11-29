@@ -258,5 +258,9 @@ if (!$1) then
 end if{}m4_dnl
 })
 
+m4_dnl Version number for the preprocessor.
+m4_dnl
+m4_define({_m4fpp_version}, {1.0})
+
 
 __silent_m4_end()m4_dnl

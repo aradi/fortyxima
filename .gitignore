@@ -4,3 +4,5 @@
 \#*
 _build
 .lock-waf_*
+.waf*
+*.pyc
