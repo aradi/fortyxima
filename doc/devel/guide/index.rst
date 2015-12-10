@@ -11,5 +11,5 @@ Fortyxima Developers Guide
    :maxdepth: 1
 
    gitworkflow.rst
-
+   style.rst
 

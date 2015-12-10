@@ -1,33 +1,4 @@
-!> \mainpage Modern Fortran file system interface
-!!
-!! The open source library
-!! [modFileSys](https://www.bitbucket.org/aradi/modfilesys) is designed to
-!! provide modern Fortran (Fortran 2003) wrappers around the file system
-!! interface of libc. With its help you can carry out those basic file system
-!! operations you were always missing in Fortran.
-!!
-!! For more information see the following sources:
-!! * [Online documentation](https://aradi.bitbucket.org/modfilesys/)
-!!   for installation and usage of the library
-!! * [API documentation](annotated.html) for the reference manual.
-!! * [Project home page](https://www.bitbucket.org/aradi/modfilesys/)
-!!   for the source code, bug tracker and further information on the project.
-
-!> Collection of convenient wrapper routines around libc's file system
-!! interface.
-!!
-!! \details You can acces the module by importing it via the \c use command:
-!!
-!!     use libmodfilesys_module
-!!
-!! The allocatable character variables used by the routines are of the kind
-!! \c c_char.  When you invoke them, you can nevertheless use normal character
-!! variables of the default kind, as they should be compatible with them. If
-!! not, your compiler should refuse to compile the code anyway.
-!!
-!!     character(:), allocatable :: mypath
-!!
-!!     mypath = getcwd()
+!> Contains wrappers around the file system interface of libc.
 !!
 module fortyxima_filesys
   use fortyxima_filesys_common
@@ -36,37 +7,37 @@ module fortyxima_filesys
   implicit none
   private
 
-  public :: dirdesc
-  public :: unlink
-  public :: rmdir
+  public :: DirDesc
+  public :: removeFile
+  public :: removeDir
   public :: remove
   public :: rename
-  public :: opendir
-  public :: isdir
-  public :: islink
-  public :: filesize
-  public :: file_exists
-  public :: mkdir
-  public :: getcwd
-  public :: chdir
+  public :: openDir
+  public :: isDir
+  public :: isLink
+  public :: fileSize
+  public :: fileExists
+  public :: makeDir
+  public :: getWorkingDir
+  public :: changeDir
   public :: link
   public :: symlink
-  public :: readlink
-  public :: realpath
+  public :: resolveLink
+  public :: realPath
 
   
   !> Directory descriptor.
-  type :: dirdesc
+  type :: DirDesc
     private
     type(c_ptr) :: cptr = c_null_ptr
   contains
     !> Returns next entry in the directory.
-    procedure :: next_filename => dirdesc_next_filename
+    procedure :: nextDirEntry => DirDesc_nextDirEntry
 
     !! Destructs a directory descriptor.
-    final :: dirdesc_destruct
+    final :: DirDesc_destruct
 
-  end type dirdesc
+  end type DirDesc
 
 
 contains
@@ -78,9 +49,9 @@ contains
   !!
   !! \details Example:
   !!
-  !!     write(*,*) "Current working directory:", getcwd()
+  !!     write(*,*) "Current working directory:", getWorkingDir()
   !!
-  function getcwd() result(res)
+  function getWorkingDir() result(res)
     character(:, kind=c_char), allocatable :: res
 
     type(c_ptr) :: pstr
@@ -92,7 +63,7 @@ contains
       res = ""
     end if
 
-  end function getcwd
+  end function getWorkingDir
 
 
   !> Changes the directory.
@@ -105,18 +76,18 @@ contains
   !!
   !!     integer :: error
   !!
-  !!     call chdir("newdir", error=error)   ! with explicit error handling
+  !!     call changeDir("newdir", error=error)   ! with explicit error handling
   !!
-  subroutine chdir(fname, error)
+  subroutine changeDir(fname, error)
     character(*, kind=c_char), intent(in) :: fname
     integer(c_int), intent(out), optional :: error
 
     integer(c_int) :: error0
 
     error0 = libc_chdir(f_c_string(fname))
-    call handle_errorcode(error0, "Call 'libc_chdir' in 'chdir'", error)
+    call handle_errorcode(error0, "Call 'libc_chdir' in 'changeDir'", error)
 
-  end subroutine chdir
+  end subroutine changeDir
 
 
   !> Creates a directory (with the default permission rights).
@@ -131,11 +102,11 @@ contains
   !!
   !!     integer :: error
   !!
-  !!     call mkdir("./mydir/test1/test2", parents=.true.)
-  !!     call mkdir("mydir")               ! parent directory must exist
-  !!     call mkdir("mydir", error=error)  ! explicit error handling
+  !!     call makeDir("./mydir/test1/test2", parents=.true.)
+  !!     call makeDir("mydir")               ! parent directory must exist
+  !!     call makeDir("mydir", error=error)  ! explicit error handling
   !!
-  subroutine mkdir(dirname, parents, error)
+  subroutine makeDir(dirname, parents, error)
     character(*, kind=c_char), intent(in) :: dirname
     logical, intent(in), optional :: parents
     integer(c_int), intent(out), optional :: error
@@ -150,14 +121,14 @@ contains
     end if
     if (parents0) then
       error0 = makedir_parent_c(f_c_string(dirname))
-      call handle_errorcode(error0, "Call 'makedir_parent_c' in mkdir",&
+      call handle_errorcode(error0, "Call 'makedir_parent_c' in makeDir",&
           & error)
     else
       error0 = makedir_c(f_c_string(dirname))
-      call handle_errorcode(error0, "Call 'makedir_c' in mkdir", error)
+      call handle_errorcode(error0, "Call 'makedir_c' in makeDir", error)
     end if
 
-  end subroutine mkdir
+  end subroutine makeDir
 
 
   !> Removes an empty directory.
@@ -172,11 +143,11 @@ contains
   !!
   !!     integer :: error
   !!
-  !!     call rmdir("test")              ! Stops, if directory can't be deleted.
-  !!     call rmdir("test", error=error) ! error =/ 0 signalizes failure
-  !!     call rmdir("test", children=.true.)  ! Recursive delete
+  !!     call removeDir("test")  ! Stops, if directory can't be deleted.
+  !!     call removeDir("test", error=error) ! error =/ 0 signalizes failure
+  !!     call removeDir("test", children=.true.)  ! Recursive delete
   !!
-  subroutine rmdir(filename, children, error)
+  subroutine removeDir(filename, children, error)
     character(*,kind=c_char), intent(in) :: filename
     logical, intent(in), optional :: children
     integer(c_int), intent(out), optional :: error
@@ -191,40 +162,40 @@ contains
     end if
     if (children0) then
       error0 = rmtree_c(f_c_string(filename))
-      call handle_errorcode(error0, "Call 'rmtree_c' in 'rmdir'", error)
+      call handle_errorcode(error0, "Call 'rmtree_c' in 'removeDir'", error)
     else
       error0 = libc_rmdir(f_c_string(filename))
-      call handle_errorcode(error0, "Call 'libc_rmdir' in 'rmdir'", &
+      call handle_errorcode(error0, "Call 'libc_rmdir' in 'removeDir'", &
           & error)
     end if
 
-  end subroutine rmdir
+  end subroutine removeDir
 
 
-  !> Unlinks (deletes) a file.
+  !> Removes a file.
   !!
   !! \details Example:
   !!
   !!     integer :: error
   !!
-  !!     call unlink("test")         ! Stops, if file can't be deleted
-  !!     call unlink("test", error)  ! error =/ 0 signalizes failure
+  !!     call removeFile("test")         ! Stops, if file can't be deleted
+  !!     call removeFile("test", error)  ! error =/ 0 signalizes failure
   !!
   !! \param filename  Name of the file.
   !! \param error  Error value of the libc unlink function. If not present and
   !!     different from zero, the routine stops.
   !!
-  subroutine unlink(filename, error)
+  subroutine removeFile(filename, error)
     character(*,kind=c_char), intent(in) :: filename
     integer(c_int), intent(out), optional :: error
 
     integer(c_int) :: error0
 
     error0 = libc_unlink(f_c_string(filename))
-    call handle_errorcode(error0, "Call 'libc_unlink' in 'unlink'", &
+    call handle_errorcode(error0, "Call 'libc_unlink' in 'removeFile'", &
         & error)
     
-  end subroutine unlink
+  end subroutine removeFile
 
 
   !> Removes a file or an empty directory.
@@ -334,31 +305,31 @@ contains
   !!
   !! \details Example:
   !!
-  !!      if (file_exists("/tmp/testfile")) then
+  !!      if (fileExists("/tmp/testfile")) then
   !!         ! do something with that file
   !!      end if
   !!
-  function file_exists(fname) result(res)
+  function fileExists(fname) result(res)
     character(*, kind=c_char), intent(in) :: fname
     logical :: res
 
     res = (file_exists_c(f_c_string(fname)) /= 0)
 
-  end function file_exists
+  end function fileExists
 
   
   !> Checks whether a file with a given name exists and is a directory.
   !!
   !! \details Example:
   !!
-  !!     if (isdir("somefile")) then
+  !!     if (isDir("somefile")) then
   !!       ! do something with the existing directory
   !!     end if
   !!
   !! \param fname  File name.
   !! \return True if file exists and is a directory, False otherwise.
   !!
-  function isdir(fname) result(res)
+  function isDir(fname) result(res)
     character(*, kind=c_char), intent(in) :: fname
     logical :: res
 
@@ -367,7 +338,7 @@ contains
     status = isdir_c(f_c_string(fname))
     res = (status /= 0)
     
-  end function isdir
+  end function isDir
 
 
   !> Checks whether a file with a given name exists and is a symbolic link.
@@ -377,11 +348,11 @@ contains
   !!
   !! \details Example:
   !!
-  !!     if (islink("somefile")) then
-  !!       write(*,*) "Link points to: ", readlink("somefile")
+  !!     if (isLink("somefile")) then
+  !!       write(*,*) "Link points to: ", resolveLink("somefile")
   !!     end if
   !!
-  function islink(fname) result(res)
+  function isLink(fname) result(res)
     character(*, kind=c_char), intent(in) :: fname
     logical :: res
 
@@ -390,7 +361,7 @@ contains
     status = islink_c(f_c_string(fname))
     res = (status /= 0)
     
-  end function islink
+  end function isLink
 
 
   !> Resolves a link.
@@ -398,9 +369,9 @@ contains
   !! \param fname  Name of the file to resolve.
   !! \return  Resolved link name or empty string if any error occured.
   !!
-  !! \details Example: see \ref islink().
+  !! \details Example: see \ref isLink().
   !!
-  function readlink(fname) result(res)
+  function resolveLink(fname) result(res)
     character(*, kind=c_char), intent(in) :: fname
     character(:, kind=c_char), allocatable :: res
 
@@ -413,7 +384,7 @@ contains
       res = ""
     end if
     
-  end function readlink
+  end function resolveLink
 
 
   !> Returns the real (canonized) name of a path.
@@ -423,9 +394,9 @@ contains
   !!
   !! \details Example:
   !!
-  !!     write(*,*) "Full canonized path name of './'", realpath("./")
+  !!     write(*,*) "Full canonized path name of './'", realPath("./")
   !!
-  function realpath(fname) result(res)
+  function realPath(fname) result(res)
     character(*, kind=c_char), intent(in) ::fname
     character(:, kind=c_char), allocatable  :: res
 
@@ -444,7 +415,7 @@ contains
       res = ""
     end if
 
-  end function realpath
+  end function realPath
     
 
   !> Returns the size of a given file.
@@ -456,15 +427,15 @@ contains
   !!
   !! \details Example:
   !!
-  !!     write(*,*) "Size of the file 'test.dat': ", filesize("test.dat")
+  !!     write(*,*) "Size of the file 'test.dat': ", fileSize("test.dat")
   !!
-  function filesize(fname) result(res)
+  function fileSize(fname) result(res)
     character(*, kind=c_char), intent(in) :: fname
     integer(c_size_t) :: res
 
     res = filesize_c(f_c_string(fname))
 
-  end function filesize
+  end function fileSize
 
 
   !> Returns a descriptor to a directory.
@@ -476,19 +447,19 @@ contains
   !!
   !! \details Example (listing the current directory):
   !!
-  !!     type(dirdesc) :: dir
+  !!     type(DirDesc) :: dir
   !!     character(:), allocatable :: path
   !!
   !!     call opendir("./", dir)
-  !!     path = dir%next_filename()
+  !!     path = dir%nextDirEntry()
   !!     do while (len(path) > 0)
   !!       write(*, "(A)") path
-  !!       path = dir%next_filename()
+  !!       path = dir%nextDirEntry()
   !!     end do
   !!
-  subroutine opendir(dirname, dirptr, error)
+  subroutine openDir(dirname, dirptr, error)
     character(*, kind=c_char), intent(in) :: dirname
-    type(dirdesc), intent(out) :: dirptr
+    type(DirDesc), intent(out) :: dirptr
     integer(c_int), intent(out), optional :: error
 
     integer(c_int) :: error0
@@ -499,10 +470,10 @@ contains
     else
       error0 = -1
     end if
-    call handle_errorcode(error0, "Call 'libc_opendir' in 'opendir'", &
+    call handle_errorcode(error0, "Call 'libc_opendir' in 'openDir'", &
         & error)
 
-  end subroutine opendir
+  end subroutine openDir
 
 
   !> Returns the name of the next entry in a directory (without "." and "..").
@@ -510,10 +481,10 @@ contains
   !! \param self  Directory descriptor.
   !! \return  Name of the next entry or empty string if error occured.
   !!
-  !! \details Example: see \ref opendir().
+  !! \details Example: see \ref openDir().
   !!
-  function dirdesc_next_filename(self) result(fname)
-    class(dirdesc), intent(inout) :: self
+  function DirDesc_nextDirEntry(self) result(fname)
+    class(DirDesc), intent(inout) :: self
     character(:, kind=c_char), allocatable :: fname
 
     type(c_ptr) :: cptr
@@ -525,17 +496,17 @@ contains
       fname = ""
     end if
 
-  end function dirdesc_next_filename
+  end function DirDesc_nextDirEntry
 
   
   !! Destructs a directory descriptor.
   !! \param self  Directory descriptor instance.
-  subroutine dirdesc_destruct(self)
-    type(dirdesc), intent(inout) :: self
+  subroutine DirDesc_destruct(self)
+    type(DirDesc), intent(inout) :: self
 
     call libc_closedir(self%cptr)
 
-  end subroutine dirdesc_destruct
+  end subroutine DirDesc_destruct
 
 
 end module fortyxima_filesys
