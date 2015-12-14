@@ -24,5 +24,17 @@ def configure(conf):
 def build(bld):
     bld.load('fxenv')
     bld.recurse('src')
+    bld.recurse('test')
 
+
+def test(bld):
+    bld.load('fxenv')
+    bld.recurse('test')
+
+
+from waflib import Build
+class testContext(Build.BuildContext):
+    'Unit tests'
+    cmd = 'test'
+    fun = 'test'
 
