@@ -47,7 +47,7 @@ def m4fpp_find_deffile(conf):
 
 @Configure.conf
 def m4fpp_check_preprocessor(conf):
-	snippet = '{}_silent_m4_begin{}123{}_silent_m4_end{}1'
+	snippet = '{}_SILENT_M4_BEGIN{}123{}_SILENT_M4_END{}1'
 	conf.m4_check_feature('Fortran preprocessing', snippet)
 
 

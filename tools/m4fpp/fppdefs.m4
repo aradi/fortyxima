@@ -55,6 +55,20 @@ m4_popdef({__if_cond})m4_dnl
 })
 
 
+m4_dnl Pushdefs a new variable with the content of an other variabe,
+m4_dnl or with respective defaults if the other variable was defined but empty
+m4_dnl or undefined.
+m4_dnl
+m4_define({__pushdef_ifdef}, {m4_dnl
+m4_pushdef({$1}, m4_ifdef({$2}, m4_ifelse(m4_len($2), 0, {$3}, {$2}), {$4}))})
+
+
+m4_dnl Defines a variable with its current value or a provided default
+m4_dnl if variable was not defined.
+m4_dnl
+m4_define({__define_ifdef}, {m4_define({$1}, m4_ifdef({$1}, {$1}, {$2}))})
+
+
 m4_dnl Splits a string into parts based on length.
 m4_dnl
 m4_dnl $1  String to split
@@ -113,7 +127,7 @@ m4_dnl argument is defined.
 m4_dnl
 m4_dnl $1  Variable to look for.
 m4_dnl
-m4_define({_ifdef}, {m4_dnl
+m4_define({_IFDEF}, {m4_dnl
 __if(m4_ifdef({$1}, 1, 0))m4_dnl
 })
 
@@ -125,7 +139,7 @@ m4_dnl argument is not defined.
 m4_dnl
 m4_dnl $1  Variable to look for.
 m4_dnl
-m4_define({_ifndef}, {m4_dnl
+m4_define({_IFNDEF}, {m4_dnl
 __if(m4_ifdef({$1}, 0, 1))m4_dnl
 })
 
@@ -138,23 +152,31 @@ m4_dnl
 m4_dnl $1  M4 conditional expression, which will be evaluated using
 m4_dnl     M4s eval() marco.
 m4_dnl
-m4_define({_if}, {m4_dnl
+m4_define({_IF}, {m4_dnl
 __if(m4_eval($1))m4_dnl
 })
 
 
 m4_dnl Defines the end of the true branch and the beginning of the false branch.
 m4_dnl
-m4_define({_else}, {m4_dnl
+m4_define({_ELSE}, {m4_dnl
 __else{}m4_dnl
 })
 
 
 m4_dnl Defines the end of an if or ifdef construct.
 m4_dnl
-m4_define({_endif}, {m4_dnl
+m4_define({_ENDIF}, {m4_dnl
 __endif{}m4_dnl
 })
+
+
+m4_dnl Defines a variable if it was not defined before to given value.
+m4_dnl
+m4_dnl $1 variable name as string
+m4_dnl $2 value
+m4_dnl
+m4_define({_DEFINE_UNDEF}, {__define_ifdef({$1}, {$2})})
 
 
 m4_dnl Splits the lines of the argument into Fortran continuation lines.
@@ -162,17 +184,17 @@ m4_dnl
 m4_dnl $1  Fortran code to be split. Can also contain multiple lines, in
 m4_dnl     that case splitting is made separately for every line.
 m4_dnl
-m4_define({_fsplit}, {__fsplit_lines({$1})})
+m4_define({_FSPLIT}, {__fsplit_lines({$1})})
 
 
 m4_dnl Marks the beginning of a block with suppressed output of M4 to stdout.
 m4_dnl
-m4_define({_silent_m4_begin}, {__silent_m4_begin()})
+m4_define({_SILENT_M4_BEGIN}, {__silent_m4_begin()})
 
 
 m4_dnl Marks the end of a block with suppressed output of M4 to stdout.
 m4_dnl
-m4_define({_silent_m4_end}, {__silent_m4_end()})
+m4_define({_SILENT_M4_END}, {__silent_m4_end()})
 
 
 m4_dnl Calls the assert subroutine, if condition is not matched.
@@ -187,60 +209,52 @@ m4_dnl   end subroutine assert
 m4_dnl
 m4_dnl $1  Fortran logical expression
 m4_dnl
-m4_define({_assert}, {m4_dnl
-_if({_ASSERTS == 1})m4_dnl
-_fsplit(_ASSERT_MACRO({($1)}, "m4___file__", m4___line__))m4_dnl
-_endif{}m4_dnl
+m4_define({_ASSERT}, {m4_dnl
+__pushdef_ifdef({__asserts}, {ASSERTS}, 1, 0){}_IF({__asserts == 1})m4_dnl
+_FSPLIT(_ASSERT_MACRO({($1)}, "m4___file__", m4___line__))m4_dnl
+_ENDIF{}m4_popdef({__asserts})m4_dnl
 })
 
 
-m4_dnl Marks the begin of a debug region, which is inserted if _DEBUG > 0.
+m4_dnl Marks the begin of a debug region, which is inserted if DEBUG > 0.
 m4_dnl
-m4_define({_debug_begin}, {_if({_DEBUG > 0})})
+m4_define({_DEBUG_BEGIN}, {m4_dnl
+__pushdef_ifdef({__debug}, {DEBUG}, 1, 0){}_IF({__debug > 0})})
 
 
 m4_dnl Marks the end of a debug region, which is inserted if _DEBUG > 0.
 m4_dnl
-m4_define({_debug_end}, {_endif})
+m4_define({_DEBUG_END}, {_ENDIF{}m4_popdef({__debug})})
 
 
 m4_dnl Inserts the argument into the code only, if _DEBUG > 0.
 m4_dnl
 m4_dnl $1  Fortran code to be inserted if in debug mode.
 m4_dnl
-m4_define({_debug}, {m4_dnl
-_debug_begin{}{$1}_debug_end{}m4_dnl
+m4_define({_DEBUG}, {m4_dnl
+_DEBUG_BEGIN{}{$1}_DEBUG_END{}m4_dnl
 })
 
 
 m4_dnl Marks the begin of an assert related region, which is inserted only if
 m4_dnl _ASSERTS = 1.
 m4_dnl
-m4_define({_assert_env_begin}, {_if({_ASSERTS == 1})})
+m4_define({_ASSERT_ENV_BEGIN}, {m4_dnl
+__pushdef_ifdef({__asserts}, {ASSERTS}, 1, 0){}_IF({__asserts == 1})})
 
 
-m4_dnl Marks the end of a debug region, which is inserted if _DEBUG > 0.
+m4_dnl Marks the end of a debug region, which is inserted if DEBUG > 0.
 m4_dnl
-m4_define({_assert_env_end}, {_endif})
+m4_define({_ASSERT_ENV_END}, {_ENDIF{}m4_popdef({__asserts})})
 
 
-m4_dnl Inserts the argument into the code only, if _DEBUG > 0.
+m4_dnl Inserts the argument into the code only, if DEBUG > 0.
 m4_dnl
 m4_dnl $1  Fortran code to be inserted if in debug mode.
 m4_dnl
-m4_define({_assert_env}, {m4_dnl
-_assert_env_begin{}{$1}_assert_env_end{}m4_dnl
+m4_define({_ASSERT_ENV}, {m4_dnl
+_ASSERT_ENV_BEGIN{}{$1}_ASSERT_ENV_END{}m4_dnl
 })
-
-
-m4_dnl Debug level set to zero, unless already explicitely defined
-m4_dnl
-m4_define({_DEBUG}, m4_ifdef({_DEBUG}, _DEBUG, 0))
-
-
-m4_dnl Asserts are not included by default.
-m4_dnl
-m4_define({_ASSERTS}, m4_ifdef({_ASSERTS}, _ASSERTS, 0))
 
 
 m4_dnl Default for the assert() call, should be replaced by the user
@@ -260,7 +274,7 @@ end if{}m4_dnl
 
 m4_dnl Version number for the preprocessor.
 m4_dnl
-m4_define({_m4fpp_version}, {1.0})
+m4_define({_M4FPP_VERSION}, {1.0})
 
 
 __silent_m4_end()m4_dnl

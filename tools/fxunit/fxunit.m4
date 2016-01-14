@@ -1,6 +1,6 @@
-__silent_m4_begin{}m4_dnl
+_SILENT_M4_BEGIN{}m4_dnl
 
-m4_define({__ASSERT}, {_fsplit(
+m4_define({_ASSERT_BLOCK}, {_FSPLIT(
 block
   logical :: success
   success = {$1}
@@ -12,10 +12,10 @@ end block{}m4_dnl
 )})
 
 
-m4_define({_ASSERT}, {__ASSERT({this%isTrue($*)})})
+m4_define({_ASSERT}, {_ASSERT_BLOCK({this%isTrue($*)})})
 
-m4_define({_ASSERT_TRUE}, {__ASSERT({this%isTrue($*)})})
+m4_define({_ASSERT_TRUE}, {_ASSERT_BLOCK({this%isTrue($*)})})
 
-m4_define({_ASSERT_FALSE}, {__ASSERT({this%isFalse($*)})})
+m4_define({_ASSERT_FALSE}, {_ASSERT_BLOCK({this%isFalse($*)})})
 
-__silent_m4_end{}m4_dnl
+_SILENT_M4_END{}m4_dnl
