@@ -159,9 +159,9 @@ int _fortyxima_filesys_makedir_parent(const char *dirname, int dnamelen)
   /* File does not exist. */
   if (status) {
     for (ii = dnamelen - 1; ii > 0 && dirname[ii] != '/'; ii--) ;
-    status = 0;
     /* If directory has parent directory try to create that one. */
     if (ii) {
+      status = 0;
       newdirname = (char *) malloc(sizeof(char) * (ii + 1));
       strncpy(newdirname, dirname, ii);
       newdirname[ii] = '\0';
@@ -344,7 +344,8 @@ char *fortyxima_filesys_readlink(const char *fname)
       free(buffer);
       break;
     }
-    else if (nchar < size) {
+    else if (nchar < size - 1) {
+      buffer[nchar] = '\0';
       return buffer;
     }
     else {

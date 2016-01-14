@@ -32,7 +32,7 @@ module fortyxima_filesys
     type(c_ptr) :: cptr = c_null_ptr
   contains
     !> Returns next entry in the directory.
-    procedure :: nextDirEntry => DirDesc_nextDirEntry
+    procedure :: getNextEntry => DirDesc_getNextEntry
 
     !! Destructs a directory descriptor.
     final :: DirDesc_destruct
@@ -121,8 +121,7 @@ contains
     end if
     if (parents0) then
       error0 = makedir_parent_c(f_c_string(dirname))
-      call handle_errorcode(error0, "Call 'makedir_parent_c' in makeDir",&
-          & error)
+      call handle_errorcode(error0, "Call 'makedir_parent_c' in makeDir", error)
     else
       error0 = makedir_c(f_c_string(dirname))
       call handle_errorcode(error0, "Call 'makedir_c' in makeDir", error)
@@ -165,8 +164,7 @@ contains
       call handle_errorcode(error0, "Call 'rmtree_c' in 'removeDir'", error)
     else
       error0 = libc_rmdir(f_c_string(filename))
-      call handle_errorcode(error0, "Call 'libc_rmdir' in 'removeDir'", &
-          & error)
+      call handle_errorcode(error0, "Call 'libc_rmdir' in 'removeDir'", error)
     end if
 
   end subroutine removeDir
@@ -192,8 +190,7 @@ contains
     integer(c_int) :: error0
 
     error0 = libc_unlink(f_c_string(filename))
-    call handle_errorcode(error0, "Call 'libc_unlink' in 'removeFile'", &
-        & error)
+    call handle_errorcode(error0, "Call 'libc_unlink' in 'removeFile'", error)
     
   end subroutine removeFile
 
@@ -218,8 +215,7 @@ contains
     integer(c_int) :: error0
 
     error0 = libc_remove(f_c_string(filename))
-    call handle_errorcode(error0, "Call 'libc_remove' in 'remove'", &
-        & error)
+    call handle_errorcode(error0, "Call 'libc_remove' in 'remove'", error)
 
   end subroutine remove
 
@@ -450,11 +446,11 @@ contains
   !!     type(DirDesc) :: dir
   !!     character(:), allocatable :: path
   !!
-  !!     call opendir("./", dir)
-  !!     path = dir%nextDirEntry()
+  !!     call openDir("./", dir)
+  !!     path = dir%nextEntry()
   !!     do while (len(path) > 0)
   !!       write(*, "(A)") path
-  !!       path = dir%nextDirEntry()
+  !!       path = dir%nextEntry()
   !!     end do
   !!
   subroutine openDir(dirname, dirptr, error)
@@ -470,8 +466,7 @@ contains
     else
       error0 = -1
     end if
-    call handle_errorcode(error0, "Call 'libc_opendir' in 'openDir'", &
-        & error)
+    call handle_errorcode(error0, "Call 'libc_opendir' in 'openDir'", error)
 
   end subroutine openDir
 
@@ -483,7 +478,7 @@ contains
   !!
   !! \details Example: see \ref openDir().
   !!
-  function DirDesc_nextDirEntry(self) result(fname)
+  function DirDesc_getNextEntry(self) result(fname)
     class(DirDesc), intent(inout) :: self
     character(:, kind=c_char), allocatable :: fname
 
@@ -496,7 +491,7 @@ contains
       fname = ""
     end if
 
-  end function DirDesc_nextDirEntry
+  end function DirDesc_getNextEntry
 
   
   !! Destructs a directory descriptor.
@@ -504,7 +499,10 @@ contains
   subroutine DirDesc_destruct(self)
     type(DirDesc), intent(inout) :: self
 
-    call libc_closedir(self%cptr)
+    if (c_associated(self%cptr)) then
+      call libc_closedir(self%cptr)
+      self%cptr = c_null_ptr
+    end if
 
   end subroutine DirDesc_destruct
 

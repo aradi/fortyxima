@@ -8,7 +8,6 @@ module fortyxima_filesys_common
   implicit none
   private
 
-  public :: stdout, stderr
   public :: f_c_string, c_f_string, f_cptr_string, cptr_f_string
   public :: handle_errorcode
 
@@ -97,7 +96,7 @@ contains
       write(stderr, "(A)") "Uncaught error code!"
       write(stderr, "(A)") msg
       write(stderr, "(A,I0)") "Error code: ", errorcode
-      stop
+      error stop 1
     end if
 
   end subroutine handle_errorcode
