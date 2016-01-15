@@ -24,31 +24,31 @@ The main official public repository of Fortyxima only contains the branches
 `release` and `hotfix`). In order to add a feature, you have to do the following
 steps:
 
-#. Fork the official repository. (This step you have to do only once. If you've
-   already forked the official repository, skip it.)
+#. Fork the official (upstream) repository. (This step you have to do only
+   once. If you've already forked the upstream repository, skip it.)
 
 #. Derive a feature branch from the `develop` branch of your forked project.
 
 #. Develop your feature in your feature branch.
 
-#. Regularly update your `develop` branch from the official `develop` branch to
-   make sure, your `develop` branch remains identical to the official one.
+#. Regularly update your `develop` branch from the upstream `develop` branch to
+   make sure, your `develop` branch remains identical to the upstream one.
 
 #. Regularly merge your `develop` branch into your feature branch, to make sure,
-   your feature branch is based on the most recent state of the official
+   your feature branch is based on the most recent state of the upstream
    `develop` branch.
 
 #. When the feature is implemented, do steps 4 and 5 again. Then issue a
-   pull request of your feature branch into the `develop` branch of the official
+   pull request of your feature branch into the `develop` branch of the upstream
    repository.
 
 #. Wait for feedback from the core developers, and apply possible
    improvments, to the feature branch, before it can be merged. Also make
-   sure to keep your feature branch up to date with the official `develop` by
+   sure to keep your feature branch up to date with the upstream `develop` by
    executing steps 4 and 5.
 
 #. When you obtain the notification, that your feature branch had been merged to
-   the official `develop` branch, delete your feature branch in your personal
+   the upstream `develop` branch, delete your feature branch in your personal
    repository. 
 
 #. In order to develop the next feature, execute the steps above again,
@@ -79,37 +79,37 @@ Forking the project
 
    Only `develop` should pop up in the list of branches, but not `master`.
 
-#. Set up a mirror of the official reference repository::
+#. Set up a mirror of the upstream reference repository::
 
-       git remote add official git@bitbucket.org:dftbplus/fortyxima
+       git remote add upstream git@bitbucket.org:dftbplus/fortyxima
 
-#. Fetch the official remote::
+#. Fetch the upstream remote::
       
-       git fetch official
+       git fetch upstream
 
 #. Check out the develop branch. (Actually, you should already be on that
    automatically, as you've set the default branch to be the develop branch)::
 
        git checkout develop
 
-#. Reset your local develop branch to be identical to the official develop
+#. Reset your local develop branch to be identical to the upstream develop
    one::
 
-       git reset --hard official/develop
+       git reset --hard upstream/develop
 
   You should see no changes, as the two branches were identical. They should be
   always automatically remain identical, if you follow the strategy outlined in
-  this document. Pull requests to the official repository are only accepted if
-  they are derived from a develop-branch *identical* to the official one.
+  this document. Pull requests to the upstream repository are only accepted if
+  they are derived from a develop-branch *identical* to the upstream one.
 
 
 Developing your feature
 -----------------------
 
 If you have already forked the project for an other feature branch before,
-execute Step 1 in section `Staying up to date with the official develop branch`_
+execute Step 1 in section `Staying up to date with the upstream develop branch`_
 before carrying out the following steps.  This way you make sure that your
-`develop` branch is synchronized with the official one. Otherwise, you can start
+`develop` branch is synchronized with the upstream one. Otherwise, you can start
 directly with the steps below:
 
 #. Create you own feature branch::
@@ -119,7 +119,7 @@ directly with the steps below:
    You always have to create an extra branch derived from `develop`, if you
    develop a new feature.  You should never work on the develop branch directly,
    or merge anything from your feature branches into it. Its only purpose is to
-   mirror the status of the official develop branch.
+   mirror the status of the upstream develop branch.
 
 #. Develop your new feature in your local branch. Make check-ins, whenever
    it seems to be logical and useful::
@@ -143,17 +143,17 @@ directly with the steps below:
    changes on this branch to Bitbucket.
 
 
-Staying up to date with the official develop branch
+Staying up to date with the upstream develop branch
 ---------------------------------------------------
 
 Time to time you should make sure, that your `develop` branch is up to date with
-the official `develop` branch.
+the upstream `develop` branch.
 
-#. Pull the recent changes from the official develop branch into your local
+#. Pull the recent changes from the upstream develop branch into your local
    develop branch::
 
        git checkout develop
-       git pull --ff-only official develop
+       git pull --ff-only upstream develop
 
    Upload the changes in your local develop branch to Bitbucket by issuing::
 
@@ -161,22 +161,22 @@ the official `develop` branch.
 
    Note: if the ``git pull --ff-only ...`` command fails, you probably have
    messed up your personal develop branch (despite all the warnings above), and
-   it can not made to be identical to the official one any more. In that case,
+   it can not made to be identical to the upstream one any more. In that case,
    you can revert it via hard reset::
 
-       git reset --hard official/develop
+       git reset --hard upstream/develop
 
    You will then eventually have to derive a new feature branch from the
    resetted `develop` branch, and add your changes on `some-new-feature`
    manually to it. So better try not to polute your `develop` branch.
 
-#. After pulling the recent changes from the official `develop` branch, change
+#. After pulling the recent changes from the upstream `develop` branch, change
    back to your feature branch, to make sure you do not commit anything into
    `develop`::
 
        git checkout some-new-feature
 
-#. Update your feature branch to incorporate the recent changes on the official
+#. Update your feature branch to incorporate the recent changes on the upstream
    `develop` branch (which you've pulled before), by merging your local
    `develop` branch into `some-new-feature`::
 
@@ -187,13 +187,13 @@ the official `develop` branch.
 
 
 
-Merging back the changes into the official repository
+Merging back the changes into the upstream repository
 -----------------------------------------------------
 
 When you have finished the implementaiton of your feature and you would like to
-get it merged into the official `develop` branch, issue a pull request.
+get it merged into the upstream `develop` branch, issue a pull request.
 
-#. First, make sure, that you have pulled the latest changes of the official
+#. First, make sure, that you have pulled the latest changes of the upstream
    develop branch to your local `develop` branch, and that you have merged those
    changes into your feature branch. (Follow the steps in the previous section.)
 
@@ -207,22 +207,22 @@ get it merged into the official `develop` branch, issue a pull request.
 
 #. Issue a pull request on bitbucket for your some-new-feature branch. (Look for
    the upwards arrow in the left menu.) Make sure, that the target of your pull
-   request the `develop` branch of the official repository
+   request the `develop` branch of the upstream repository
    (`dftbplus/fortyxima`).
 
 #. Wait for the comments of core the developers, fix things you are asked for,
    and push the changes to your feature branch on bitbucket.
 
 #. Once the discussion on your pull request is done, one of the developers with
-   write permission to the official repository will merge your branch into the
-   official `develop`-branch. Once this has happened, you should see your
+   write permission to the upstream repository will merge your branch into the
+   upstream `develop`-branch. Once this has happened, you should see your
    changes showing up there.
 
 
 Deleting your feature branch
 ----------------------------
 
-If your feature had been merged into the official code, you can delete your
+If your feature had been merged into the upstream code, you can delete your
 feature branch locally and on Bitbucket as well:
 
 #. In order to delete the feature branch locally, change to the develop branch
