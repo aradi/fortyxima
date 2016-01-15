@@ -1,0 +1,55 @@
+#!/bin/bash
+
+WAF_CORE_TOOLS="__init__,ar,c,c_aliases,c_config,c_osx,c_preproc,c_tests,ccroot,clang,clangxx,compiler_c,compiler_cxx,compiler_fc,cxx,errcheck,fc,fc_config,fc_scan,g95,gcc,gfortran,gxx,icc,icpc,ifort,irixcc,python,suncc,suncxx,waf_unit_test,xlc,xlcxx"
+
+WAF_TOOLS="c_bgxlc,c_nex,fc_bgxlf,fc_cray,fc_nag,fc_nec,fc_open64,fc_pgfortran,fc_solstudio,fc_xlf,parallel_debug,pgicc,pgicxx"
+
+WAF_EXTRAS="m4 m4fpp userconfig"
+
+scriptdir=$(dirname $0)
+cd $scriptdir
+scriptdir=$PWD
+cd - > /dev/null
+
+if [ "$1" == "--help" -o "$1" == "-h" -o -z "$1" ]; then
+  echo "build-waf [ -h | --fortyxima ] waf_source_dir"
+  echo ""
+  echo "Builds a waf executable to be used in scientific Fortran/C projects."
+  echo ""
+  echo "Arguments:"
+  echo "    waf_source_dir  Directory containing the unpacked waf source."
+  echo "            The directory must be writeable as the waf file is built within"
+  echo "            this directory."
+  echo ""
+  echo "Options:"
+  echo "    --help       Obtain this help message."
+  echo "    --fortyxima  Build a Fortyxima specific version which does not include the "
+  echo "            extra modules to be found in the Fortyxima source tree."
+  exit
+fi
+
+if [ "$1" == "--fortyxima" ]; then
+  echo "Building waf for Fortyxima (packaged without the extras in the Fortyxima tree)"
+  shift
+else
+  echo "Building general waf (packaged with the extras in the Fortyxima tree)"
+  for extra in $WAF_EXTRAS; do
+    WAF_TOOLS="$WAF_TOOLS,$scriptdir/extras/${extra}.py"
+  done
+fi
+
+wafsrcdir=$1
+
+if [ -z "$wafsrcdir"  ]; then
+  echo "Need the directory to an unpacked waf source tree." >&2
+  exit
+fi
+  
+if [ -e $wafsrcdir/waf ]; then
+  rm -f $wafsrcdir/waf
+fi
+
+cd $wafsrcdir
+python waf-light --make-waf --strip --prelude='' --coretools=$WAF_CORE_TOOLS --tools=$WAF_TOOLS
+cd - > /dev/null
+mv $wafsrcdir/waf ./waf

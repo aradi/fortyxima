@@ -1,0 +1,12 @@
+filesys_removefile
+filesys_dirmanip
+filesys_dirmaniprecursive
+filesys_remove
+filesys_renamefile
+filesys_renamedir
+filesys_symlink
+filesys_filesize
+filesys_directorylist
+filesys_getworkingdir
+filesys_realpath
+filesys_link

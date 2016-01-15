@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+import argparse
+import fxunit as fxu
+
+def main():
+    args = parse_arguments()
+    modules, instances, calls = fxu.get_entities_from_files(args.source)
+    if args.namefile:
+        args.namefile.write('\n'.join(get_test_names(calls)))
+    drivertxt = TEMPLATE_DRIVER_ATOMIC.format(
+        "\n".join(get_atomic_dispatch_lines_1(calls)), 
+        "\n".join(get_atomic_dispatch_lines_2(calls)))
+    args.output.write(drivertxt)
+        
+    
+def parse_arguments():
+    msg = 'Extract information from Fortran source files, which can be used ' \
+          'in a unit test driver program.'
+    parser = argparse.ArgumentParser(description=msg)
+    msg = 'fortran source file(s) to process'
+    parser.add_argument('source', nargs='+', help=msg) 
+    msg = 'write name of the tests which can be executed into file ' \
+          '(\'-\' for stdout)'
+    parser.add_argument(
+        '-n', '--write-test-names', default=None, dest='namefile', 
+        type=argparse.FileType('w'), help=msg)
+    msg = 'output file name'
+    parser.add_argument(
+        '-o', '--output', default='-', type=argparse.FileType('w'), help=msg)
+    return parser.parse_args()
+
+
+def get_atomic_dispatch_lines_1(calls):
+    lines = []
+    for modname, typename, subname in calls:
+        testname = get_test_name(modname, subname)
+        lines.append('case ("{0}")'.format(testname))
+        lines.append('  call {0}'.format(testname))
+    return lines
+
+
+def get_atomic_dispatch_lines_2(calls):
+    lines = []
+    for modname, typename, subname in calls:
+        testname = get_test_name(modname, subname)
+        instancename = typename + INSTANCE_SUFFIX
+        lines.append('\n')
+        lines.append('subroutine {0}'.format(testname))
+        lines.append('  use {0}, only : {1}'.format(modname, typename))
+        lines.append('  type({0}) :: {1}'.format(typename, instancename))
+        lines.append('')
+        lines.append('  call {0}%setUp("{1}")'.format(instancename, testname))
+        lines.append('  call {0}%{1}()'.format(instancename, subname))
+        lines.append('  call {0}%tearDown()'.format(instancename))
+        lines.append('  call handleTestResult({0})'.format(instancename))
+        lines.append('')
+        lines.append('end subroutine {0}'.format(testname))
+    return lines
+
+
+def get_test_name(modname, subname):
+    if subname.startswith('test'):
+        subname = subname[4:]
+    if subname.startswith('_'):
+        subname = subname[1:]
+    return ''.join([ modname, NAME_SEPARATOR, subname ])
+
+def get_test_names(calls):
+    testnames = [ get_test_name(modname, subname)
+                  for modname, typename, subname in calls ]
+    return testnames
+
+
+NAME_SEPARATOR = '_'
+
+INSTANCE_SUFFIX = 'Inst'
+
+
+
+TEMPLATE_DRIVER_ATOMIC = '''program fxunit_driver_atomic
+  use fortyxima_unittest
+  implicit none
+
+  character(:), allocatable :: testName
+  integer :: argLen
+
+  call get_command_argument(1, length=argLen)
+  allocate(character(argLen) :: testName)
+  call get_command_argument(1, testName)
+
+  select case (trim(testName))
+{0}
+  case default
+    write(stderr, "(A,A,A)") "Invalid test name \'", trim(testName), "\'"
+    error stop 1
+  end select
+
+contains
+
+  subroutine handleTestResult(test)
+    class(TestCase), intent(in) :: test
+
+    if (test%status == TEST_FAILED) then
+      write(stderr, "(A)") "Test failed!"
+      write(stderr, "(A,1X,A)") "File:", test%file
+      write(stderr, "(A,1X,I0)") "Line:", test%line
+      write(stderr, "(A,1X,A)") "Test:", test%msg
+      error stop 1
+    end if
+
+  end subroutine handleTestResult
+
+{1}
+  
+end program fxunit_driver_atomic
+'''
+
+
+if __name__ == '__main__':
+    main()
