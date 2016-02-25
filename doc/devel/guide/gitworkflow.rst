@@ -81,7 +81,7 @@ Forking the project
 
 #. Set up a mirror of the upstream reference repository::
 
-       git remote add upstream git@bitbucket.org:dftbplus/fortyxima
+       git remote add upstream git@bitbucket.org:aradi/fortyxima
 
 #. Fetch the upstream remote::
       
@@ -208,7 +208,7 @@ get it merged into the upstream `develop` branch, issue a pull request.
 #. Issue a pull request on bitbucket for your some-new-feature branch. (Look for
    the upwards arrow in the left menu.) Make sure, that the target of your pull
    request the `develop` branch of the upstream repository
-   (`dftbplus/fortyxima`).
+   (`aradi/fortyxima`).
 
 #. Wait for the comments of core the developers, fix things you are asked for,
    and push the changes to your feature branch on bitbucket.
