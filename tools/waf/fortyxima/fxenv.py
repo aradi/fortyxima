@@ -2,10 +2,14 @@
 import os.path
 import fxtools
 
+
 def options(opt):
     opt.load('userconfig')
     opt.load('fxunit')
-    #opt.load('fx_unit_test')
+    msg = 'Components to include into the library (e.g. \'filesys,fxunit\').' \
+          ' Default: all available components.'
+    opt.add_option('--with-components', action='store', default=None,
+                   metavar='COMPONENTS', dest='components', help=msg)
 
 
 def configure(conf):
