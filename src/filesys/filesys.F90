@@ -13,6 +13,7 @@ module fortyxima_filesys
   public :: remove
   public :: rename
   public :: openDir
+  public :: closeDir
   public :: isDir
   public :: isLink
   public :: fileSize
@@ -34,8 +35,10 @@ module fortyxima_filesys
     !> Returns next entry in the directory.
     procedure :: getNextEntry => DirDesc_getNextEntry
 
+m4_ifdef({COMP_GFORTRAN}, {}, {    
     !! Destructs a directory descriptor.
     final :: DirDesc_destruct
+})
 
   end type DirDesc
 
@@ -453,6 +456,10 @@ contains
   !!       path = dir%nextEntry()
   !!     end do
   !!
+  !!     ! closeDir call only needed if compiled with GFortran (bug 68778)
+  !!     ! Otherwise dir will be automatically closed when going out of scope.
+  !!     call closeDir(dir)
+  !!
   subroutine openDir(dirname, dirptr, error)
     character(*, kind=c_char), intent(in) :: dirname
     type(DirDesc), intent(out) :: dirptr
@@ -469,6 +476,25 @@ contains
     call handle_errorcode(error0, "Call 'libc_opendir' in 'openDir'", error)
 
   end subroutine openDir
+
+
+  !> Frees the directory descriptor and deallocates memory.
+  !!
+  !! \param dirptr  Descriptor to be freed.
+  !!
+  !! \note Usually you should not call this function as the structure destructor
+  !!     does it automatically for you when the descriptor goes out of
+  !!     scope. However, for GFortran the destructor is disabled as it leads to
+  !!     crashing code due to bug 68778. In that case, you can call this
+  !!     function explicitely after having finished all directory operations, in
+  !!     order to avoid memory leaks.
+  !!
+  subroutine closeDir(dirptr)
+    type(DirDesc), intent(inout) :: dirptr
+
+    call DirDesc_destruct(dirptr)
+
+  end subroutine closeDir
 
 
   !> Returns the name of the next entry in a directory (without "." and "..").

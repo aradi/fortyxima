@@ -10,13 +10,8 @@ def configure(conf):
     conf.load('compiler_fc')
     conf.load('compiler_c')
     conf.load('m4fpp')
-    if conf.options.components:
-        conf.env.components = [ s.lower() 
-                                for s in conf.options.components.split(',') ]
-    else:
-        conf.env.components = ALL_COMPONENTS
-    conf.env.DEFINES_COMPONENTS = [ 'WITH_{}'.format(s.upper()) 
-                                    for s in conf.env.components ]
+    configure_component_defines(conf)
+    configure_fc_defines(conf)
 
 
 def build(bld):
@@ -29,5 +24,19 @@ def build(bld):
         features="m4fpp c fc fcstlib",
         source=libsources,
         target="fortyxima",
-        use=[ 'COMPONENTS' ]
+        use=[ 'COMPONENTS', 'FCNAME' ]
     )
+
+
+def configure_component_defines(conf):
+    if conf.options.components:
+        conf.env.components = [ s.lower() 
+                                for s in conf.options.components.split(',') ]
+    else:
+        conf.env.components = ALL_COMPONENTS
+    conf.env.DEFINES_COMPONENTS = [ 'WITH_{}'.format(s.upper()) 
+                                    for s in conf.env.components ]
+    
+
+def configure_fc_defines(conf):
+    conf.env.DEFINES_FCNAME = [ 'COMP_{}'.format(conf.env.FC_NAME) ]

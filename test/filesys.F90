@@ -223,6 +223,10 @@ contains
       fileName = dir%getNextEntry()
     end do
     _ASSERT(count(done) == nFiles)
+    ! closeDir is only needed for GFortran as destructor is disabled for it.
+    ! We test nevertheless for all compilers, to make sure, it does not make
+    ! any harm with active destructor.
+    call closeDir(dir)
 
   end subroutine test_directoryList
 
