@@ -103,6 +103,15 @@ module fortyxima_filesys_libcwrapiface
       character(kind=c_char), intent(in) :: fname(*)
       type(c_ptr) :: res
     end function readlink_c
+
+    !> Creates a copy of a file.
+    function copyfile_c(fromfile, tofile, buffsize) &
+        & bind(c, name='fortyxima_copyfile') result(res)
+      import :: c_char, c_int
+      character(kind=c_char), intent(in) :: fromfile(*), tofile(*)
+      integer(c_int), value :: buffsize
+      integer(c_int) :: res
+    end function copyfile_c
       
   end interface
 

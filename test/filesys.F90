@@ -22,6 +22,7 @@ module filesys
     procedure :: test_getWorkingDir
     procedure :: test_realPath
     procedure :: test_link
+    procedure :: test_copyFile
   end type MyTest
 
 contains
@@ -291,6 +292,27 @@ contains
     @:assertTrue all(buffer1 == buffer2)
 
   end subroutine test_link
+
+
+  subroutine test_copyFile(this)
+    class(MyTest), intent(inout) :: this
+
+    character(*), parameter :: file1 = 'test.dat', file2 = 'test2.dat'
+    integer, parameter :: fileSize = 100
+    integer, parameter :: bufferSize = 22
+    character, allocatable :: content1(:), content2(:)
+    integer :: error
+
+    call createDummyFile(file1, fileSize)
+    call copyFile(file1, file2, bufferSize=bufferSize, error=error)
+    @:assertTrue error == 0
+    allocate(content1(fileSize))
+    allocate(content2(fileSize))
+    call readFileContent(file1, content1)
+    call readFileContent(file2, content2)
+    @:assertTrue all(content1 == content2)
+    
+  end subroutine test_copyFile
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

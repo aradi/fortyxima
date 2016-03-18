@@ -25,6 +25,7 @@ module fortyxima_filesys
   public :: symlink
   public :: resolveLink
   public :: realPath
+  public :: copyFile
 
   
   !> Directory descriptor.
@@ -532,6 +533,41 @@ contains
     end if
 
   end subroutine DirDesc_destruct
+
+
+  !> Creates a new file with the content of an other one.
+  !!
+  !! \details Example:
+  !!
+  !!      call copyFile("/tmp/file1", "/tmp/file2")
+  !!
+  !! \param orig  File to be copied.
+  !! \param copy  Copy file to be created (or replaced if already existing).
+  !! \param bufferSize  Buffer size to use during copy (default: 64 kB).
+  !! \param error  Error code of the operation. If not present and
+  !!     different from zero, the routine stops.
+  !!
+  subroutine copyFile(orig, copy, bufferSize, error)
+    character(*), intent(in) :: orig, copy
+    integer(c_int), intent(in), optional :: bufferSize
+    integer(c_int), intent(out), optional :: error
+
+    integer(c_int) :: error0, bufferSize0
+    integer(c_int), parameter :: defaultBufferSize = 64 * 1024
+
+    if (present(bufferSize)) then
+      bufferSize0 = bufferSize
+    else
+      bufferSize0 = defaultBufferSize
+    end if
+    if (.not. fileExists(orig)) then
+      error0 = 1
+      call handle_errorcode(error0, "copyFile: missing source file", error)
+    end if
+    error0 = copyfile_c(f_c_string(orig), f_c_string(copy), bufferSize0)
+    call handle_errorcode(error0, "copyfile_c in copyFile", error)
+
+  end subroutine copyFile
 
 
 end module fortyxima_filesys

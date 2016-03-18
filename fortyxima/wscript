@@ -16,7 +16,7 @@ def configure(conf):
 
 
 def build(bld):
-    libsources = bld.path.ant_glob('fortyxima.F90')
+    libsources = bld.path.ant_glob('_module_.F90')
     if 'filesys' in bld.env.components:
         libsources += bld.path.ant_glob(['filesys/*.F90', 'filesys/*.c'])
     if 'unittest' in bld.env.components:

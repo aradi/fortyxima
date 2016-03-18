@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -354,4 +355,36 @@ char *fortyxima_filesys_readlink(const char *fname)
     }
   }
   return NULL;
+}
+
+
+/** Creates a copy of a file.
+ *  \param orig  Name of file to be copied.
+ *  \param copy  Name of the copy.
+ *  \param buffsize  Size of the buffer to use for copying.
+ *  \return 0 on success, -1 if files can not be opened, -2 if copying failed.
+ *
+ */
+int fortyxima_copyfile(const char *orig, const char *copy, int buffsize)
+{
+  char buffer[buffsize];
+  FILE *porig, *pcopy;
+  int status;
+  size_t nn;
+
+  porig = fopen(orig, "rb");
+  pcopy = fopen(copy, "wb");
+  if (porig == NULL || pcopy == NULL) {
+    return -1;
+  }
+  status = 0;
+  while ((nn = fread(buffer, sizeof(char), sizeof(buffer), porig)) > 0) {
+    if (fwrite(buffer, sizeof(char), nn, pcopy) != nn) {
+      status = -2;
+      break;
+    }
+  }
+  fclose(porig);
+  fclose(pcopy);
+  return status;
 }
