@@ -1,12 +1,13 @@
+import os
 
 def build(bld):
+    top = bld.srcnode.abspath()
     libsources = bld.path.ant_glob(['*.F90'])
     bld(
-        features='m4fpp fc fcprogram testdriver',
-        testfiles=[ 'tests' ],
+        features='fypp fc fcprogram testdriver',
+        testfiles=['tests'],
         source=libsources,
         target='fxudriver',
-        use=[ 'fortyxima' ],
-        includes='../tools/fxunit'
+        use=['fortyxima'],
+        includes=[os.path.join(top, 'tools/fxunit')]
     )
-
