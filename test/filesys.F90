@@ -1,4 +1,4 @@
-m4_include({fxunit.m4})
+#:include 'fxunit.fypp'
   
 module filesys
   use, intrinsic :: iso_c_binding, only : c_char
@@ -67,12 +67,13 @@ contains
     integer :: error
 
     call createDummyFile(fileName)
-    _ASSERT(fileExists(fileName))
+    @:assertTrue fileExists(fileName)
+    @:assertTrue fileExists(fileName)
     call removeFile(fileName, error)
-    _ASSERT(error == 0)
-    _ASSERT_FALSE(fileExists(fileName))
+    @:assertTrue error == 0
+    @:assertFalse fileExists(fileName)
     call removeFile(fileName, error)
-    _ASSERT(error /= 0)
+    @:assertTrue error /= 0
     
   end subroutine test_removeFile
 
@@ -84,11 +85,11 @@ contains
     integer :: error
 
     call makeDir(dirName, error=error)
-    _ASSERT(error == 0)
-    _ASSERT(isDir(dirName))
+    @:assertTrue error == 0
+    @:assertTrue isDir(dirName)
     call removeDir(dirName, error=error)
-    _ASSERT(error == 0)
-    _ASSERT_FALSE(isDir(dirName))
+    @:assertTrue error == 0
+    @:assertFalse isDir(dirName)
 
   end subroutine test_dirManip
 
@@ -101,16 +102,16 @@ contains
     integer :: error
 
     call makeDir(dirName // '/' // subdirName, error=error)
-    _ASSERT(error /= 0)
-    _ASSERT(.not. isDir(dirName))
+    @:assertTrue error /= 0
+    @:assertTrue .not. isDir(dirName)
     call makeDir(dirName // '/' // subdirName, parents=.true.)
-    _ASSERT(isDir(dirName))
-    _ASSERT(isDir(dirName // '/' // subdirName))
+    @:assertTrue isDir(dirName)
+    @:assertTrue isDir(dirName // '/' // subdirName)
     call removeDir(dirName, error=error)
-    _ASSERT(error /= 0)
-    _ASSERT(isDir(dirName))
+    @:assertTrue error /= 0
+    @:assertTrue isDir(dirName)
     call removeDir(dirName, children=.true.)
-    _ASSERT(.not. isDir(dirName))
+    @:assertTrue .not. isDir(dirName)
 
   end subroutine test_dirManipRecursive
 
@@ -126,14 +127,14 @@ contains
     call makeDir(dirName)
     fpath = dirName // '/' // fileName
     call createDummyFile(fpath)
-    _ASSERT(fileExists(fpath))
+    @:assertTrue fileExists(fpath)
     call remove(dirName, error=error)
-    _ASSERT(error /= 0)
-    _ASSERT(fileExists(fpath))
+    @:assertTrue error /= 0
+    @:assertTrue fileExists(fpath)
     call remove(fpath)
-    _ASSERT_FALSE(fileExists(fileName))
+    @:assertFalse fileExists(fileName)
     call remove(dirName)
-    _ASSERT_FALSE(isDir(dirName))
+    @:assertFalse isDir(dirName)
 
   end subroutine test_remove
 
@@ -145,10 +146,10 @@ contains
     character(*), parameter :: fileName2 = 'test.dat.new'
 
     call createDummyFile(fileName)
-    _ASSERT(fileExists(fileName))
+    @:assertTrue fileExists(fileName)
     call rename(fileName, fileName2)
-    _ASSERT(fileExists(fileName2))
-    _ASSERT_FALSE(fileExists(fileName))
+    @:assertTrue fileExists(fileName2)
+    @:assertFalse fileExists(fileName)
 
   end subroutine test_renameFile
 
@@ -160,10 +161,10 @@ contains
     character(*), parameter :: dirName2 = 'testdir.new'
 
     call makeDir(dirName)
-    _ASSERT(isDir(dirName))
+    @:assertTrue isDir(dirName)
     call rename(dirName, dirName2)
-    _ASSERT(isDir(dirName2))
-    _ASSERT_FALSE(isDir(dirName))
+    @:assertTrue isDir(dirName2)
+    @:assertFalse isDir(dirName)
 
   end subroutine test_renameDir
 
@@ -176,12 +177,12 @@ contains
     character(:), allocatable :: resolved
 
     call createDummyFile(fileName)
-    _ASSERT(.not. isLink(fileName))
+    @:assertTrue .not. isLink(fileName)
     call symlink(fileName, fileName2)
-    _ASSERT(fileExists(fileName2))
-    _ASSERT(isLink(fileName2))
+    @:assertTrue fileExists(fileName2)
+    @:assertTrue isLink(fileName2)
     resolved = resolveLink(fileName2)
-    _ASSERT(resolved == fileName)
+    @:assertTrue resolved == fileName
 
   end subroutine test_symlink
 
@@ -193,7 +194,7 @@ contains
     integer, parameter :: fileSize0 = 20
 
     call createDummyFile(fileName, fileSize=fileSize0)
-    _ASSERT(fileSize(fileName) == fileSize0)
+    @:assertTrue fileSize(fileName) == fileSize0
 
   end subroutine test_fileSize
 
@@ -217,12 +218,12 @@ contains
     fileName = dir%getNextEntry()
     do while(len(fileName) > 0)
       match(:) = (fileNames == fileName)
-      _ASSERT(count(match) == 1)
-      _ASSERT(count(match .and. done) == 0)
+      @:assertTrue count(match) == 1
+      @:assertTrue count(match .and. done) == 0
       done(:) = done .or. match
       fileName = dir%getNextEntry()
     end do
-    _ASSERT(count(done) == nFiles)
+    @:assertTrue count(done) == nFiles
     ! closeDir is only needed for GFortran as destructor is disabled for it.
     ! We test nevertheless for all compilers, to make sure, it does not make
     ! any harm with active destructor.
@@ -242,13 +243,13 @@ contains
     dir1 = getWorkingDir()
     call changeDir(dirname // '/' // subdirName)
     dir2 = getWorkingDir()
-    _ASSERT(dir2 == dir1 // '/' // dirName // '/' // subdirName)
+    @:assertTrue dir2 == dir1 // '/' // dirName // '/' // subdirName
     call changeDir('../')
     dir2 = getWorkingDir()
-    _ASSERT(dir2 == dir1 // '/' // dirName)
+    @:assertTrue dir2 == dir1 // '/' // dirName
     call changeDir('../')
     dir2 = getWorkingDir()
-    _ASSERT(dir2 == dir1)
+    @:assertTrue dir2 == dir1
 
   end subroutine test_getWorkingDir
       
@@ -263,10 +264,10 @@ contains
     rpath0 = realPath('./')
     dir1 = dirname // '/' // subdirName
     rpath1 = realPath(dir1)
-    _ASSERT(len(rpath1) == 0)
+    @:assertTrue len(rpath1) == 0
     call makeDir(dir1, parents=.true.)
     rpath1 = realPath(dir1)
-    _ASSERT(rpath1 == rpath0 // '/' // dirname // '/' // subdirName)
+    @:assertTrue rpath1 == rpath0 // '/' // dirname // '/' // subdirName
 
   end subroutine test_realPath
 
@@ -280,19 +281,18 @@ contains
 
     call createDummyFile(file1)
     call link(file1, file1, error=error)
-    _ASSERT(error /= 0)
+    @:assertTrue error /= 0
     call link(file1, file2)
-    _ASSERT(fileSize(file1) == fileSize(file2))
+    @:assertTrue fileSize(file1) == fileSize(file2)
     allocate(buffer1(fileSize(file1)))
     allocate(buffer2(fileSize(file2)))
     call readFileContent(file1, buffer1)
     call readFileContent(file2, buffer2)
-    _ASSERT(all(buffer1 == buffer2))
+    @:assertTrue all(buffer1 == buffer2)
 
   end subroutine test_link
 
 
-  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!  Helper routines
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

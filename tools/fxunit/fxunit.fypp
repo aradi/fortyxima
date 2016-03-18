@@ -1,0 +1,24 @@
+#:mute
+
+#:def _assert_block(cond)
+block
+  logical :: success
+  success = ${cond}$
+  call this%reportTestResult(success, "${_FILE_}$", ${_LINE_}$, "${cond}$")
+  if (.not. success) then
+    return
+  end if
+end block
+#:enddef
+
+
+#:def assertTrue(cond)
+$:_assert_block('this%isTrue({})'.format(cond))
+#:enddef
+
+
+#:def assertFalse(cond)
+$:_assert_block('this%isFalse({})'.format(cond))
+#:enddef
+
+#:endmute

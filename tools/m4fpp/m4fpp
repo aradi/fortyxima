@@ -1,6 +1,0 @@
-#!/bin/bash
-
-mydir=$(dirname $0)
-fxppdefs=$mydir/fppdefs.m4
-
-m4 -P $fxppdefs $@

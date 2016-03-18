@@ -35,10 +35,11 @@ module fortyxima_filesys
     !> Returns next entry in the directory.
     procedure :: getNextEntry => DirDesc_getNextEntry
 
-m4_ifdef({COMP_GFORTRAN}, {}, {    
-    !! Destructs a directory descriptor.
+  #! Workaround: Gfortran has problems with destructors (as of version 5.2)
+  #:if not defined('COMP_GFORTRAN')
+    ! Destructs a directory descriptor.
     final :: DirDesc_destruct
-})
+  #:endif
 
   end type DirDesc
 

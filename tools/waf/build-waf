@@ -1,8 +1,8 @@
 #!/bin/bash
 
-WAF_CORE_TOOLS="__init__,ar,c,c_aliases,c_config,c_osx,c_preproc,c_tests,ccroot,clang,clangxx,compiler_c,compiler_cxx,compiler_fc,cxx,errcheck,fc,fc_config,fc_scan,g95,gcc,gfortran,gxx,icc,icpc,ifort,irixcc,python,suncc,suncxx,waf_unit_test,xlc,xlcxx"
+WAF_CORE_TOOLS="__init__,ar,c,c_aliases,c_config,c_osx,c_preproc,c_tests,ccroot,clang,clangxx,compiler_c,compiler_cxx,compiler_fc,cxx,errcheck,fc,fc_config,fc_scan,g95,gcc,gfortran,gxx,icc,icpc,ifort,irixcc,python,suncc,suncxx,waf_unit_test,winres,xlc,xlcxx"
 
-WAF_TOOLS="c_bgxlc,c_nex,fc_bgxlf,fc_cray,fc_nag,fc_nec,fc_open64,fc_pgfortran,fc_solstudio,fc_xlf,parallel_debug,pgicc,pgicxx"
+WAF_TOOLS="__init__,c_bgxlc,c_nex,fc_bgxlf,fc_cray,fc_nag,fc_nec,fc_open64,fc_pgfortran,fc_solstudio,fc_xlf,parallel_debug,pgicc,pgicxx"
 
 WAF_EXTRAS="m4 m4fpp userconfig"
 

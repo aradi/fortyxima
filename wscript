@@ -1,7 +1,7 @@
 import sys
 import os
 # Set paths to customized waf tools
-for path in [ "tools/waf/fortyxima", "tools/waf/extras" ]:
+for path in ["tools/waf/fortyxima", "tools/waf/extras"]:
     sys.path.append(os.path.abspath(os.path.join(os.getcwd(), path)))
 
 APPNAME = 'fortyxima'

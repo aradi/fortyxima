@@ -1,5 +1,5 @@
 module fortyxima
-  m4_ifdef({WITH_FILESYS}, {use fortyxima_filesys})
-  m4_ifdef({WITH_UNITTEST}, {use fortyxima_unittest})
+  #{if defined('WITH_FILESYS')}#use fortyxima_filesys#{endif}#
+  #{if defined('WITH_UNITTEST')}#use fortyxima_unittest#{endif}#
   implicit none
 end module fortyxima
