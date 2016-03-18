@@ -13,17 +13,17 @@ out = '_build'
 
 def options(opt):
     opt.load('fxenv')
-    opt.recurse('src')
+    opt.recurse('fortyxima')
 
 
 def configure(conf):
     conf.load('fxenv')
-    conf.recurse('src')
+    conf.recurse('fortyxima')
 
 
 def build(bld):
     bld.load('fxenv')
-    bld.recurse('src')
+    bld.recurse('fortyxima')
     if bld.cmd == 'test':
         bld.recurse('test')
 

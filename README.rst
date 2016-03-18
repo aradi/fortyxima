@@ -13,23 +13,49 @@ The package is available under the terms of the BSD 2-Clause License (see
 Package content
 ===============
 
-The library contains following modules:
+The library currently contains following module:
 
 **filesys** 
 File system manipulation (creating/deleting directories, symbolic links, etc..)
 by using Fortran-friendly wrappers around appropriate libc-routines.
 
+**unittest**
+Unit testing framework (also used by Fortyxima to test itself).
 
-Additionally Fortyxima contains following tools:
 
-**m4fpp** 
-Fortran preprocessor based on the general purpose macro language M4. It offers
-higher flexibility in defining templates in Fortran as CPP (e.g. multiline
-macros are possible). It has similar basic constructs as CPP (`_IF`,
-`_IFDEF`, etc.) with additional tools for for supporting the creation of
-reliable programs (e.g. asserts, marking code sequences to be included only in
-debug mode, etc.).
+Installing
+==========
 
-**waf**
-Extension modules to the general purpose build tool `waf <http://waf.io>`_,
-customizing it more for Fortran projects.
+
+Requirements
+------------
+
+* Fortran 2003 compatible compiler
+
+* C compiler
+
+* Python interpreter (2.7, 3.2 or above)
+
+* The `Fypp preprocessor <https://bitbucket.org/aradi/fypp>`_.
+
+
+Building the library
+--------------------
+
+The project uses the `waf building framework <http://waf.io>`_. First configure
+your project by::
+
+  ./waf configure
+
+If you want to make let `waf` to look for a specific compiler issue::
+
+  ./waf configure --check-fortran-compiler=COMPILER
+
+where ``COMPILER`` is the name of the compiler (e.g. ``gfortran``, ``ifort``,
+``fc_nag``, etc.). After the configuration you can build the project by::
+
+  ./waf build
+
+In order to run the unittests, use ::
+
+  ./waf test
