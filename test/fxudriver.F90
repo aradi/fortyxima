@@ -34,6 +34,8 @@ case ("filesys_realpath")
   call filesys_realpath
 case ("filesys_link")
   call filesys_link
+case ("filesys_copyfile")
+  call filesys_copyfile
   case default
     write(stderr, "(A,A,A)") "Invalid test name '", trim(testName), "'"
     error stop 1
@@ -198,5 +200,17 @@ subroutine filesys_link
   call handleTestResult(mytestInst)
 
 end subroutine filesys_link
+
+
+subroutine filesys_copyfile
+  use filesys, only : mytest
+  type(mytest) :: mytestInst
+
+  call mytestInst%setUp("filesys_copyfile")
+  call mytestInst%test_copyfile()
+  call mytestInst%tearDown()
+  call handleTestResult(mytestInst)
+
+end subroutine filesys_copyfile
   
 end program fxunit_driver_atomic

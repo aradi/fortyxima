@@ -10,3 +10,4 @@ filesys_directorylist
 filesys_getworkingdir
 filesys_realpath
 filesys_link
+filesys_copyfile
